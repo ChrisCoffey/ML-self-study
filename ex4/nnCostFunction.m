@@ -62,26 +62,27 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-to_bit_vector = @(as) arrayfun(@(n) full(sparse(1, n, 1, 1, num_labels)), as, "UniformOutput", false);
+% Add the bias onto the front
+a1 = [ones(m, 1) X];
+z2 = a1 * Theta1';
+a2 = sigmoid(z2);
+z3 = [ones(size(a2, 1), 1) a2] * Theta2';
+h_of_x = sigmoid(z3);
 
-a2 = sigmoid(Theta1 * [ones(m, 1) X]');
-a3 = sigmoid(Theta2 * [ones(m, 1) a2']');
-[x, h_of_x] = max(a3);
-%to_bit_vector(h_of_x)
-% y= to_bit_vector(y);
+% Earlier bug was in not performing this conversion from decimal numbers to bit
+% vectors properly. I don't fully understand the math of why this is important
+% yet...
+y_bits = zeros(m, num_labels);
+for i = 1:m
+  y_bits(i, y(i)) = 1;
+end
 
-y_ones = ones(size(y));
+cost = sum(sum(((y_bits .* -1) .* log(h_of_x)) - ((1 - y_bits) .* log(1 - h_of_x))));
 
-J = (1/m) * sum( ((y .* -1) .* log(h_of_x)) - ((y_ones - y) .* log(y_ones - h_of_x)) );
-
-
-
-
+reg_expr = (lambda / (2*m)) * (sum(sum(Theta1(:, 2:end) .^2)) + sum(sum(Theta2(:, 2:end) .^2)) );
 
 
-
-
-
+J = (1/m * cost) + reg_expr;
 
 % -------------------------------------------------------------
 
