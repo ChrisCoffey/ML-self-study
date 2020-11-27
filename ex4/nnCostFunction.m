@@ -70,8 +70,7 @@ z3 = [ones(size(a2, 1), 1) a2] * Theta2';
 h_of_x = sigmoid(z3);
 
 % Earlier bug was in not performing this conversion from decimal numbers to bit
-% vectors properly. I don't fully understand the math of why this is important
-% yet...
+% vectors properly.
 y_bits = zeros(m, num_labels);
 for i = 1:m
   y_bits(i, y(i)) = 1;
@@ -83,6 +82,34 @@ reg_expr = (lambda / (2*m)) * (sum(sum(Theta1(:, 2:end) .^2)) + sum(sum(Theta2(:
 
 
 J = (1/m * cost) + reg_expr;
+
+
+% Backprop
+for i = 1:m
+  % Create a column vector from each training example
+  % Then feed forward until h(x) is known
+  a_1 = [1; X(i, :)' ];
+  z_2 = Theta1 * a_1;
+  a_2 = [1; sigmoid(z_2)];
+  z_3 = Theta2 * a_2;
+  output = sigmoid(z_3);
+
+  % determine the output index, which is the
+  % class this node most likely maps to
+  [_, ix] = max(output);
+  % A column vector of outputs, with only one of them changing
+  delta_3 = output - y_bits(i, :)';
+  delta_2 = (Theta2' * delta_3) .* [1; sigmoidGradient(z_2)];
+  delta_2 = delta_2(2:end);
+
+  % Accumulate the deltas into their prospective layers
+  Theta1_grad = Theta1_grad + delta_2 * a_1';
+  Theta2_grad = Theta2_grad + delta_3 * a_2';
+end
+
+Theta1_grad = (1/m) * Theta1_grad + (lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:, 2:end)];
+Theta2_grad = (1/m) * Theta2_grad + (lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:, 2:end)];
+
 
 % -------------------------------------------------------------
 
