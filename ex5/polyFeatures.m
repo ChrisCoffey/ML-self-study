@@ -15,15 +15,14 @@ X_poly = zeros(numel(X), p);
 %
 %
 
-m = length(X);
-for p = 1:m
-  x_res = X .^ p;
-  for n = 1:length(x_res)
-    X_poly(n, p) = x_res(n);
+n = numel(X)
+for a = 1:p
+  x_res = X .^ a;
+  start = ((n * a) - n);
+  for m = 1:n
+    X_poly(m+start) = x_res(m);
   end
 end
-
-
 
 
 % =========================================================================
