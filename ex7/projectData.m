@@ -19,7 +19,7 @@ Z = zeros(size(X, 1), K);
 %
 
 for i = 1:rows(X)
-  Z(i, :) = X(i, :) * U(:, K);
+  Z(i, :) = X(i, :) * U(:, 1:K);
 end
 
 
